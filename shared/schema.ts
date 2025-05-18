@@ -134,6 +134,36 @@ export const insertTeamMemberSchema = createInsertSchema(teamMembers).pick({
   role: true,
 });
 
+// Integration settings for Jenkins and GitHub
+export const integrationSettings = pgTable("integration_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  jenkinsUrl: text("jenkins_url"),
+  jenkinsUsername: text("jenkins_username"),
+  jenkinsToken: text("jenkins_token"),
+  jenkinsJobTemplate: text("jenkins_job_template"),
+  githubUrl: text("github_url"),
+  githubUsername: text("github_username"),
+  githubToken: text("github_token"),
+  githubRepository: text("github_repository"),
+  githubBranch: text("github_branch").default("main"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIntegrationSettingsSchema = createInsertSchema(integrationSettings).pick({
+  userId: true,
+  jenkinsUrl: true,
+  jenkinsUsername: true,
+  jenkinsToken: true,
+  jenkinsJobTemplate: true,
+  githubUrl: true,
+  githubUsername: true,
+  githubToken: true,
+  githubRepository: true,
+  githubBranch: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -155,3 +185,6 @@ export type InsertSharedPipeline = z.infer<typeof insertSharedPipelineSchema>;
 
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+
+export type IntegrationSettings = typeof integrationSettings.$inferSelect;
+export type InsertIntegrationSettings = z.infer<typeof insertIntegrationSettingsSchema>;

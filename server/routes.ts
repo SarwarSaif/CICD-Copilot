@@ -338,6 +338,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const teamMembers = await storage.getAllTeamMembers();
     res.json(teamMembers);
   });
+  
+  // Integration settings endpoints
+  app.get('/api/integration-settings/:userId', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+      
+      const settings = await storage.getIntegrationSettings(userId);
+      
+      if (!settings) {
+        // Return empty settings if none found
+        return res.json({
+          userId,
+          jenkinsUrl: '',
+          jenkinsUsername: '',
+          jenkinsToken: '',
+          jenkinsJobTemplate: '',
+          githubUrl: '',
+          githubUsername: '',
+          githubToken: '',
+          githubRepository: '',
+          githubBranch: 'main'
+        });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
+  
+  app.post('/api/integration-settings/:userId', express.json(), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+      
+      const settings = req.body;
+      settings.userId = userId; // Ensure the userId is set correctly
+      
+      const updatedSettings = await storage.updateIntegrationSettings(userId, settings);
+      
+      res.json(updatedSettings);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
 
   // Create HTTP server
   const httpServer = createServer(app);

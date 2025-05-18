@@ -56,8 +56,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use a different port if 5000 is already in use
-  const port = 5001;
+  // Use port 5000 as expected by the workflow
+  const port = 5000;
   server.listen({
     port,
     host: "127.0.0.1",

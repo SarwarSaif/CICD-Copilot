@@ -5,7 +5,8 @@ import {
   PipelineStep, InsertPipelineStep,
   PipelineExecution, InsertPipelineExecution,
   SharedPipeline, InsertSharedPipeline,
-  TeamMember, InsertTeamMember
+  TeamMember, InsertTeamMember,
+  IntegrationSettings, InsertIntegrationSettings
 } from "@shared/schema";
 
 export interface IStorage {
@@ -50,6 +51,10 @@ export interface IStorage {
   getAllTeamMembers(): Promise<TeamMember[]>;
   getTeamMember(id: number): Promise<TeamMember | undefined>;
   createTeamMember(teamMember: InsertTeamMember): Promise<TeamMember>;
+  
+  // Integration settings operations
+  getIntegrationSettings(userId: number): Promise<IntegrationSettings | undefined>;
+  updateIntegrationSettings(userId: number, settings: InsertIntegrationSettings): Promise<IntegrationSettings>;
 }
 
 export class MemStorage implements IStorage {
@@ -60,6 +65,7 @@ export class MemStorage implements IStorage {
   private pipelineExecutions: Map<number, PipelineExecution>;
   private sharedPipelines: Map<number, SharedPipeline>;
   private teamMembers: Map<number, TeamMember>;
+  private integrationSettings: Map<number, IntegrationSettings>;
   
   private currentUserId: number;
   private currentMopFileId: number;
@@ -68,6 +74,7 @@ export class MemStorage implements IStorage {
   private currentPipelineExecutionId: number;
   private currentSharedPipelineId: number;
   private currentTeamMemberId: number;
+  private currentIntegrationSettingsId: number;
 
   constructor() {
     this.users = new Map();
@@ -77,6 +84,7 @@ export class MemStorage implements IStorage {
     this.pipelineExecutions = new Map();
     this.sharedPipelines = new Map();
     this.teamMembers = new Map();
+    this.integrationSettings = new Map();
     
     this.currentUserId = 1;
     this.currentMopFileId = 1;
@@ -85,6 +93,7 @@ export class MemStorage implements IStorage {
     this.currentPipelineExecutionId = 1;
     this.currentSharedPipelineId = 1;
     this.currentTeamMemberId = 1;
+    this.currentIntegrationSettingsId = 1;
     
     // Initialize with some sample data
     this.initializeSampleData();
@@ -509,6 +518,56 @@ steps:
     };
     this.teamMembers.set(id, teamMember);
     return teamMember;
+  }
+  
+  // Integration settings operations
+  async getIntegrationSettings(userId: number): Promise<IntegrationSettings | undefined> {
+    // Find settings for this user
+    for (const settings of this.integrationSettings.values()) {
+      if (settings.userId === userId) {
+        return settings;
+      }
+    }
+    return undefined;
+  }
+  
+  async updateIntegrationSettings(userId: number, settings: InsertIntegrationSettings): Promise<IntegrationSettings> {
+    // Check if settings for this user already exist
+    let existingSettings: IntegrationSettings | undefined;
+    let settingsId = 0;
+    
+    for (const [id, storedSettings] of this.integrationSettings.entries()) {
+      if (storedSettings.userId === userId) {
+        existingSettings = storedSettings;
+        settingsId = id;
+        break;
+      }
+    }
+    
+    if (existingSettings) {
+      // Update existing settings
+      const updatedSettings: IntegrationSettings = {
+        ...existingSettings,
+        ...settings,
+        updatedAt: new Date()
+      };
+      
+      this.integrationSettings.set(settingsId, updatedSettings);
+      return updatedSettings;
+    } else {
+      // Create new settings
+      const id = this.currentIntegrationSettingsId++;
+      
+      const newSettings: IntegrationSettings = {
+        id,
+        ...settings,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      this.integrationSettings.set(id, newSettings);
+      return newSettings;
+    }
   }
 }
 
