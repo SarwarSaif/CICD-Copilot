@@ -1,89 +1,79 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { 
-  CircleAlert, 
-  Database, 
-  FileText, 
-  Filter, 
-  Gauge, 
-  GitBranch, 
-  Maximize, 
-  MoveHorizontal, 
-  Settings, 
-  Trash2, 
-  Upload
-} from 'lucide-react';
 
-// Node type icons
-const nodeIcons: Record<string, React.ReactNode> = {
-  data_import: <Database size={20} />,
-  data_export: <Upload size={20} />,
-  transform: <MoveHorizontal size={20} />,
-  filter: <Filter size={20} />,
-  analyze: <Gauge size={20} />,
-  merge: <GitBranch size={20} />,
-  cleanup: <Trash2 size={20} />,
-  extract: <Maximize size={20} />,
-  mop_file: <FileText size={20} />,
-  config: <Settings size={20} />,
-  default: <CircleAlert size={20} />
+// Node types and their corresponding styling
+const NODE_TYPES: Record<string, { color: string; icon: string }> = {
+  data_import: {
+    color: 'bg-blue-100 border-blue-300 text-blue-800',
+    icon: '📥',
+  },
+  transform: {
+    color: 'bg-purple-100 border-purple-300 text-purple-800',
+    icon: '🔄',
+  },
+  filter: {
+    color: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+    icon: '🔍',
+  },
+  validate: {
+    color: 'bg-green-100 border-green-300 text-green-800',
+    icon: '✅',
+  },
+  export: {
+    color: 'bg-red-100 border-red-300 text-red-800',
+    icon: '📤',
+  },
+  script: {
+    color: 'bg-gray-100 border-gray-300 text-gray-800',
+    icon: '📜',
+  },
+  notification: {
+    color: 'bg-indigo-100 border-indigo-300 text-indigo-800',
+    icon: '🔔',
+  },
+  // Default styling for unknown types
+  default: {
+    color: 'bg-gray-100 border-gray-300 text-gray-800',
+    icon: '❓',
+  },
 };
 
-const PipelineNode: React.FC<NodeProps> = ({ data, isConnectable, selected }) => {
-  // Get the appropriate icon for this node type
-  const icon = nodeIcons[data.type] || nodeIcons.default;
+const PipelineNode: React.FC<NodeProps> = ({ data, selected, isConnectable }) => {
+  // Determine node styling based on type
+  const nodeType = data.type || 'default';
+  const { color, icon } = NODE_TYPES[nodeType] || NODE_TYPES.default;
   
   return (
     <div 
-      className={`
-        relative px-4 py-2 rounded-md text-sm font-medium border-2 min-w-[180px]
-        ${selected ? 'border-primary bg-primary/10' : 'border-gray-300 bg-white'} 
-        shadow-md transition-all
-      `}
+      className={`px-4 py-2 rounded-md border-2 ${color} ${
+        selected ? 'shadow-md border-blue-500' : ''
+      }`}
     >
       {/* Input handle */}
       <Handle
         type="target"
-        position={Position.Left}
+        position={Position.Top}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-white bg-gray-400"
+        className="w-3 h-3 bg-blue-500"
       />
       
       {/* Node content */}
-      <div className="flex items-center gap-2">
-        <div className={`p-1 rounded-full ${selected ? 'text-primary' : 'text-gray-700'}`}>
-          {icon}
-        </div>
-        <div className="flex flex-col">
-          <span className="font-bold">{data.label}</span>
-          <span className="text-xs text-gray-500">{data.type}</span>
+      <div className="flex items-center">
+        <span className="text-lg mr-2">{icon}</span>
+        <div>
+          <div className="font-medium">{data.label}</div>
+          {data.description && (
+            <div className="text-xs truncate max-w-[150px]">{data.description}</div>
+          )}
         </div>
       </div>
-      
-      {/* Show configuration summary if any */}
-      {data.config && Object.keys(data.config).length > 0 && (
-        <div className="text-xs text-gray-500 mt-1 border-t border-gray-200 pt-1">
-          <div className="max-h-14 overflow-auto">
-            {Object.entries(data.config).map(([key, value]) => (
-              <div key={key} className="flex justify-between gap-2">
-                <span className="font-medium">{key}:</span>
-                <span className="truncate">
-                  {typeof value === 'object' 
-                    ? JSON.stringify(value).substring(0, 20) + '...' 
-                    : String(value).substring(0, 20) + (String(value).length > 20 ? '...' : '')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
       
       {/* Output handle */}
       <Handle
         type="source"
-        position={Position.Right}
+        position={Position.Bottom}
         isConnectable={isConnectable}
-        className="w-3 h-3 border-2 border-white bg-gray-400"
+        className="w-3 h-3 bg-blue-500"
       />
     </div>
   );

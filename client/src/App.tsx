@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import MopFiles from "@/pages/MopFiles";
 import Pipelines from "@/pages/Pipelines";
+import PipelineVisualizer from "@/pages/PipelineVisualizer";
 import Shared from "@/pages/Shared";
 import Settings from "@/pages/Settings";
 import Sidebar from "@/components/layout/Sidebar";
@@ -23,6 +24,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/mop-files" component={MopFiles} />
           <Route path="/pipelines" component={Pipelines} />
+          <Route path="/pipelines/visualizer/:id?" component={PipelineVisualizer} />
           <Route path="/shared" component={Shared} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

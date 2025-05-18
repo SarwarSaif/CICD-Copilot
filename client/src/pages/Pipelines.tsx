@@ -102,12 +102,12 @@ export default function Pipelines() {
             <h1 className="text-2xl font-bold text-gray-900">Pipelines</h1>
             <p className="text-gray-600 mt-1">Manage your executable pipelines</p>
           </div>
-          <div className="mt-4 sm:mt-0">
+          <div className="mt-4 sm:mt-0 flex space-x-2">
             <Button
               asChild
               className="flex items-center"
             >
-              <a href="/mop-files">
+              <a href="/pipelines/visualizer">
                 <GitBranch className="h-4 w-4 mr-2" /> Create New Pipeline
               </a>
             </Button>
@@ -184,8 +184,8 @@ export default function Pipelines() {
                         size="sm"
                         className="w-full"
                       >
-                        <a href={`/pipelines/${pipeline.id}`}>
-                          <Settings className="h-4 w-4 mr-1" /> Configure
+                        <a href={`/pipelines/visualizer/${pipeline.id}`}>
+                          <Settings className="h-4 w-4 mr-1" /> Edit & Visualize
                         </a>
                       </Button>
                       <Button
