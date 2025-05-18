@@ -1,7 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import CodeMirror from '@uiw/react-codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -14,7 +13,7 @@ interface CodeEditorProps {
 
 export function CodeEditor({ pipelineId }: CodeEditorProps) {
   const [code, setCode] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true); // Always in editing mode
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -45,7 +44,7 @@ export function CodeEditor({ pipelineId }: CodeEditorProps) {
   const jenkinsCode = data?.jenkins_code || '';
   
   // Initialize code state when data loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (data?.jenkins_code) {
       setCode(data.jenkins_code);
     }
@@ -68,7 +67,6 @@ export function CodeEditor({ pipelineId }: CodeEditorProps) {
         title: 'Pipeline Updated',
         description: 'Jenkins pipeline code has been updated successfully.',
       });
-      setIsEditing(false);
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['/api/pipelines', pipelineId, 'jenkins_pipeline'] });
       queryClient.invalidateQueries({ queryKey: ['/api/pipelines', pipelineId] });
@@ -87,23 +85,11 @@ export function CodeEditor({ pipelineId }: CodeEditorProps) {
     updateMutation.mutate(code);
   };
   
-  // Handle edit button click
-  const handleEdit = () => {
-    setCode(jenkinsCode);
-    setIsEditing(true);
-  };
-  
-  // Handle cancel button click
-  const handleCancel = () => {
-    setIsEditing(false);
-    setCode(jenkinsCode);
-  };
-  
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Jenkins Pipeline Code</CardTitle>
+          <CardTitle>Jenkins Pipeline Code Editor</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64 flex items-center justify-center">
@@ -118,7 +104,7 @@ export function CodeEditor({ pipelineId }: CodeEditorProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Jenkins Pipeline Code</CardTitle>
+          <CardTitle>Jenkins Pipeline Code Editor</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64 flex items-center justify-center text-red-500">
@@ -132,73 +118,46 @@ export function CodeEditor({ pipelineId }: CodeEditorProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Jenkins Pipeline Code</CardTitle>
+        <CardTitle>Jenkins Pipeline Code Editor</CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="code" className="w-full">
-          <TabsList>
-            <TabsTrigger value="code">Code</TabsTrigger>
-            <TabsTrigger value="visualization">Visualization</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="code" className="mt-4">
-            <div className="border rounded-md">
-              <CodeMirror
-                value={isEditing ? code : jenkinsCode}
-                height="400px"
-                extensions={[javascript({ jsx: true })]}
-                onChange={onChange}
-                readOnly={!isEditing}
-                theme="dark"
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLineGutter: true,
-                  highlightSpecialChars: true,
-                  foldGutter: true,
-                  drawSelection: true,
-                  dropCursor: true,
-                  allowMultipleSelections: true,
-                  indentOnInput: true,
-                  syntaxHighlighting: true,
-                  bracketMatching: true,
-                  closeBrackets: true,
-                  autocompletion: true,
-                  rectangularSelection: true,
-                  crosshairCursor: true,
-                  highlightActiveLine: true,
-                  highlightSelectionMatches: true,
-                  closeBracketsKeymap: true,
-                  searchKeymap: true,
-                  foldKeymap: true,
-                  completionKeymap: true,
-                  lintKeymap: true,
-                }}
-              />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="visualization" className="mt-4">
-            <div className="border rounded-md h-[400px] p-4 flex items-center justify-center">
-              <p className="text-muted-foreground">Pipeline visualization coming soon...</p>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="border rounded-md">
+          <CodeMirror
+            value={code}
+            height="500px"
+            extensions={[javascript({ jsx: true })]}
+            onChange={onChange}
+            theme="dark"
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: true,
+              highlightSpecialChars: true,
+              foldGutter: true,
+              drawSelection: true,
+              dropCursor: true,
+              allowMultipleSelections: true,
+              indentOnInput: true,
+              syntaxHighlighting: true,
+              bracketMatching: true,
+              closeBrackets: true,
+              autocompletion: true,
+              rectangularSelection: true,
+              crosshairCursor: true,
+              highlightActiveLine: true,
+              highlightSelectionMatches: true,
+              closeBracketsKeymap: true,
+              searchKeymap: true,
+              foldKeymap: true,
+              completionKeymap: true,
+              lintKeymap: true,
+            }}
+          />
+        </div>
       </CardContent>
       <CardFooter className="flex justify-end space-x-2">
-        {isEditing ? (
-          <>
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </>
-        ) : (
-          <Button onClick={handleEdit}>
-            Edit Pipeline
-          </Button>
-        )}
+        <Button onClick={handleSave} disabled={updateMutation.isPending}>
+          {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+        </Button>
       </CardFooter>
     </Card>
   );

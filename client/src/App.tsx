@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import MopFiles from "@/pages/MopFiles";
 import Pipelines from "@/pages/Pipelines";
 import PipelineVisualizer from "@/pages/PipelineVisualizer";
+import JenkinsPipeline from "@/pages/JenkinsPipeline";
 import Shared from "@/pages/Shared";
 import Settings from "@/pages/Settings";
 import Sidebar from "@/components/layout/Sidebar";
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/mop-files" component={MopFiles} />
           <Route path="/pipelines" component={Pipelines} />
           <Route path="/pipelines/visualizer/:id?" component={PipelineVisualizer} />
+          <Route path="/pipelines/jenkins/:id" component={JenkinsPipeline} />
           <Route path="/shared" component={Shared} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

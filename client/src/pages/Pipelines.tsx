@@ -189,6 +189,16 @@ export default function Pipelines() {
                         </a>
                       </Button>
                       <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        <a href={`/pipelines/jenkins/${pipeline.id}`}>
+                          <GitBranch className="h-4 w-4 mr-1" /> Jenkins Code
+                        </a>
+                      </Button>
+                      <Button
                         size="sm"
                         className="w-full"
                         disabled={pipeline.status !== 'active'}
