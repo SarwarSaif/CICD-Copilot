@@ -4,20 +4,27 @@ import { storage } from "./storage";
 import express from "express";
 import multer from "multer";
 import path from "path";
-import { insertPhotoSchema, insertCollectionSchema, insertSharedPhotoSchema, insertTeamMemberSchema } from "@shared/schema";
+import { 
+  insertMopFileSchema, 
+  insertPipelineSchema, 
+  insertPipelineStepSchema, 
+  insertPipelineExecutionSchema,
+  insertSharedPipelineSchema, 
+  insertTeamMemberSchema 
+} from "@shared/schema";
 
 // Set up multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (_req, file, cb) => {
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/heic'];
-    if (allowedMimes.includes(file.mimetype)) {
+    const allowedMimes = ['text/plain', 'text/yaml', 'text/x-yaml', 'application/x-yaml', 'application/yaml'];
+    if (allowedMimes.includes(file.mimetype) || file.originalname.endsWith('.yaml') || file.originalname.endsWith('.yml') || file.originalname.endsWith('.mop')) {
       cb(null, true);
     } else {
-      cb(new Error(`Invalid file type. Only ${allowedMimes.join(', ')} are allowed.`));
+      cb(new Error(`Invalid file type. Only MOP files, YAML, or plain text files are allowed.`));
     }
   },
 });
@@ -30,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       id: 1,
       firstName: 'John',
       lastName: 'Doe',
-      email: 'john@remotework.co',
+      email: 'john@devplatform.co',
       username: 'johndoe',
     };
     
@@ -39,57 +46,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Stats route
   app.get('/api/stats', async (req, res) => {
-    const totalPhotos = await storage.getPhotoCount();
-    const collections = await storage.getCollectionCount();
-    const shared = await storage.getSharedPhotoCount();
+    const totalMopFiles = await storage.getMopFileCount();
+    const pipelines = await storage.getPipelineCount();
+    const shared = await storage.getSharedPipelineCount();
     
     res.json({
-      totalPhotos,
-      collections,
+      totalMopFiles,
+      pipelines,
       shared
     });
   });
 
-  // Photo routes
-  app.get('/api/photos', async (req, res) => {
-    const photos = await storage.getAllPhotos();
-    res.json(photos);
+  // MOP file routes
+  app.get('/api/mop-files', async (req, res) => {
+    const mopFiles = await storage.getAllMopFiles();
+    res.json(mopFiles);
   });
 
-  app.get('/api/photos/recent', async (req, res) => {
-    const recentPhotos = await storage.getRecentPhotos();
-    res.json(recentPhotos);
+  app.get('/api/mop-files/recent', async (req, res) => {
+    const recentMopFiles = await storage.getRecentMopFiles();
+    res.json(recentMopFiles);
   });
 
-  app.get('/api/photos/shared', async (req, res) => {
-    const sharedPhotos = await storage.getSharedPhotos();
-    res.json(sharedPhotos);
+  app.get('/api/mop-files/:id', async (req, res) => {
+    const mopFile = await storage.getMopFile(parseInt(req.params.id));
+    if (!mopFile) {
+      return res.status(404).json({ error: 'MOP file not found' });
+    }
+    res.json(mopFile);
   });
 
-  app.post('/api/photos/upload', upload.single('photo'), async (req, res) => {
+  app.post('/api/mop-files/upload', upload.single('mopFile'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
 
-      // In a real app, we would save the file to storage and get a URL
-      // For this MVP, we're creating a local URL
-      const fileName = `photo-${Date.now()}${path.extname(req.file.originalname)}`;
+      const fileContent = req.file.buffer.toString('utf-8');
       
-      // Mocking the URL for development
-      const photoUrl = `https://source.unsplash.com/random/800x800/?workspace`;
-      
-      const photoData = {
+      const mopFileData = {
         userId: 1, // Mocked user ID
-        title: req.file.originalname.replace(/\.[^/.]+$/, "") || 'Untitled',
-        description: '',
-        url: photoUrl,
+        name: req.body.name || req.file.originalname.replace(/\.[^/.]+$/, "") || 'Untitled',
+        description: req.body.description || '',
+        content: fileContent,
       };
       
-      const parsedPhotoData = insertPhotoSchema.parse(photoData);
-      const photo = await storage.createPhoto(parsedPhotoData);
+      const parsedMopFileData = insertMopFileSchema.parse(mopFileData);
+      const mopFile = await storage.createMopFile(parsedMopFileData);
       
-      res.status(201).json(photo);
+      res.status(201).json(mopFile);
     } catch (error) {
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
@@ -99,39 +104,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Collection routes
-  app.get('/api/collections', async (req, res) => {
-    const collections = await storage.getAllCollections();
+  // Pipeline routes
+  app.get('/api/pipelines', async (req, res) => {
+    const pipelines = await storage.getAllPipelines();
     
-    // Get photo count for each collection
-    const collectionsWithCount = await Promise.all(
-      collections.map(async (collection) => {
-        const photoCount = await storage.getCollectionPhotoCount(collection.id);
+    // Get step count for each pipeline
+    const pipelinesWithCount = await Promise.all(
+      pipelines.map(async (pipeline) => {
+        const stepCount = await storage.getPipelineStepCount(pipeline.id);
+        const mopFile = await storage.getMopFile(pipeline.mopFileId);
         return {
-          ...collection,
-          photoCount,
+          ...pipeline,
+          stepCount,
+          mopFileName: mopFile?.name || 'Unknown',
           // Mock sharing for development
-          sharedWith: Math.floor(Math.random() * 10)
+          sharedWith: Math.floor(Math.random() * 5)
         };
       })
     );
     
-    res.json(collectionsWithCount);
+    res.json(pipelinesWithCount);
   });
 
-  app.post('/api/collections', express.json(), async (req, res) => {
+  app.get('/api/pipelines/:id', async (req, res) => {
+    const pipeline = await storage.getPipeline(parseInt(req.params.id));
+    if (!pipeline) {
+      return res.status(404).json({ error: 'Pipeline not found' });
+    }
+    
+    // Get the associated MOP file
+    const mopFile = await storage.getMopFile(pipeline.mopFileId);
+    
+    // Get pipeline steps
+    const steps = await storage.getPipelineSteps(pipeline.id);
+    
+    // Get recent executions
+    const recentExecutions = await storage.getRecentPipelineExecutions(pipeline.id, 3);
+    
+    res.json({
+      ...pipeline,
+      mopFile,
+      steps,
+      recentExecutions
+    });
+  });
+
+  app.post('/api/pipelines', express.json(), async (req, res) => {
     try {
-      const collectionData = {
+      const pipelineData = {
         userId: 1, // Mocked user ID
         name: req.body.name,
         description: req.body.description || '',
-        coverUrl: req.body.coverUrl || '',
+        mopFileId: req.body.mopFileId,
+        status: req.body.status || 'draft',
+        config: req.body.config || {},
       };
       
-      const parsedCollectionData = insertCollectionSchema.parse(collectionData);
-      const collection = await storage.createCollection(parsedCollectionData);
+      const parsedPipelineData = insertPipelineSchema.parse(pipelineData);
+      const pipeline = await storage.createPipeline(parsedPipelineData);
       
-      res.status(201).json(collection);
+      res.status(201).json(pipeline);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
+
+  // Pipeline steps routes
+  app.get('/api/pipelines/:pipelineId/steps', async (req, res) => {
+    const pipelineSteps = await storage.getPipelineSteps(parseInt(req.params.pipelineId));
+    res.json(pipelineSteps);
+  });
+
+  app.post('/api/pipeline-steps', express.json(), async (req, res) => {
+    try {
+      const stepData = {
+        pipelineId: req.body.pipelineId,
+        name: req.body.name,
+        type: req.body.type,
+        config: req.body.config || {},
+        position: req.body.position,
+      };
+      
+      const parsedStepData = insertPipelineStepSchema.parse(stepData);
+      const step = await storage.createPipelineStep(parsedStepData);
+      
+      res.status(201).json(step);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
+
+  // Pipeline execution routes
+  app.get('/api/pipelines/:pipelineId/executions', async (req, res) => {
+    const executions = await storage.getAllPipelineExecutions(parseInt(req.params.pipelineId));
+    res.json(executions);
+  });
+
+  app.post('/api/pipeline-executions', express.json(), async (req, res) => {
+    try {
+      const executionData = {
+        pipelineId: req.body.pipelineId,
+        status: 'running', // Always start as running
+        logs: '',
+        results: {},
+      };
+      
+      const parsedExecutionData = insertPipelineExecutionSchema.parse(executionData);
+      const execution = await storage.createPipelineExecution(parsedExecutionData);
+      
+      // In a real system, we would start an actual execution process here
+      // For this demo, we'll simulate an execution process that updates status after a delay
+      setTimeout(async () => {
+        const success = Math.random() > 0.3; // 70% chance of success
+        await storage.updatePipelineExecution(execution.id, {
+          status: success ? 'completed' : 'failed',
+          completedAt: new Date(),
+          logs: success ? 'Pipeline executed successfully' : 'Pipeline execution failed: Error in step 2',
+          results: success ? { success: true, metrics: { duration: Math.floor(Math.random() * 2000) + 500 } } : { success: false, error: 'Step 2 failed with code 1' }
+        });
+      }, 5000); // Simulate 5 seconds of execution time
+      
+      res.status(201).json(execution);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
+
+  // Shared pipeline routes
+  app.get('/api/pipelines/shared', async (req, res) => {
+    const sharedPipelines = await storage.getSharedPipelines();
+    res.json(sharedPipelines);
+  });
+
+  app.post('/api/pipelines/share', express.json(), async (req, res) => {
+    try {
+      const sharedPipelineData = {
+        pipelineId: req.body.pipelineId,
+        sharedByUserId: 1, // Mocked user ID
+        sharedWithUserId: req.body.sharedWithUserId,
+        permissions: req.body.permissions || 'view',
+      };
+      
+      const parsedSharedPipelineData = insertSharedPipelineSchema.parse(sharedPipelineData);
+      const sharedPipeline = await storage.sharePipeline(parsedSharedPipelineData);
+      
+      res.status(201).json(sharedPipeline);
     } catch (error) {
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
