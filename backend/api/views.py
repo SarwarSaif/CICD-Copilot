@@ -168,6 +168,66 @@ class PipelineViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(detail=True, methods=['get'])
+    def jenkins_pipeline(self, request, pk=None):
+        """Get the Jenkins pipeline code for a pipeline"""
+        from .jenkins_converter import JenkinsConverter
+        
+        pipeline = self.get_object()
+        
+        try:
+            # Get the associated MOP file
+            mop_file = pipeline.mop_file
+            mop_content = mop_file.content if mop_file else ""
+            
+            # Convert to Jenkins pipeline
+            jenkins_code = JenkinsConverter.convert_to_jenkins_pipeline(
+                mop_content=mop_content,
+                pipeline_config=pipeline.config
+            )
+            
+            return Response({
+                'jenkins_code': jenkins_code
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to generate Jenkins pipeline: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'])
+    def update_jenkins_code(self, request, pk=None):
+        """Update the Jenkins pipeline code for a pipeline"""
+        pipeline = self.get_object()
+        
+        try:
+            # Get the Jenkins code from the request
+            jenkins_code = request.data.get('jenkins_code')
+            if not jenkins_code:
+                return Response(
+                    {'error': "Jenkins pipeline code is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Store the Jenkins code in the pipeline's config
+            if not pipeline.config:
+                pipeline.config = {}
+            
+            pipeline.config['jenkins_code'] = jenkins_code
+            pipeline.save()
+            
+            return Response({
+                'message': "Jenkins pipeline code updated successfully",
+                'pipeline': PipelineSerializer(pipeline).data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {'error': f"Failed to update Jenkins pipeline: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PipelineStepViewSet(viewsets.ModelViewSet):

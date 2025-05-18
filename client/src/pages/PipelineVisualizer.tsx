@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import PipelineEditor from '@/components/pipeline/PipelineEditor';
+import { CodeEditor } from '@/components/pipeline/CodeEditor';
 
 const PipelineVisualizer: React.FC = () => {
   const [location, setLocation] = useLocation();
@@ -154,6 +155,7 @@ const PipelineVisualizer: React.FC = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
           <TabsList className="mb-4">
             <TabsTrigger value="editor">Visual Editor</TabsTrigger>
+            <TabsTrigger value="jenkins">Jenkins Pipeline</TabsTrigger>
             <TabsTrigger value="json">JSON View</TabsTrigger>
           </TabsList>
           
@@ -163,6 +165,23 @@ const PipelineVisualizer: React.FC = () => {
               initialData={pipeline}
               onSave={handleSavePipeline}
             />
+          </TabsContent>
+          
+          <TabsContent value="jenkins">
+            {pipelineId ? (
+              <CodeEditor pipelineId={pipelineId} />
+            ) : (
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle>Jenkins Pipeline Code</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md h-[400px] flex items-center justify-center">
+                    <p className="text-muted-foreground">Please save the pipeline first to access the Jenkins pipeline editor.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="json">
