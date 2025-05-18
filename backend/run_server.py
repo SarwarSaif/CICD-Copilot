@@ -41,10 +41,10 @@ def run_command(command):
 def setup_database():
     """Create and apply migrations"""
     print("Creating database migrations...")
-    run_command('python manage.py makemigrations api')
+    run_command('python3 manage.py makemigrations api')
     
     print("\nApplying migrations...")
-    run_command('python manage.py migrate')
+    run_command('python3 manage.py migrate')
 
 def create_superuser():
     """Create a superuser if one doesn't exist"""
@@ -64,7 +64,7 @@ def run_server():
     host = os.environ.get('DJANGO_HOST', '0.0.0.0')
     port = os.environ.get('DJANGO_PORT', '8000')
     print(f"\nStarting Django server at {host}:{port}...")
-    run_command(f'python manage.py runserver {host}:{port}')
+    run_command(f'python3 manage.py runserver {host}:{port}')
 
 if __name__ == '__main__':
     # Change to the backend directory

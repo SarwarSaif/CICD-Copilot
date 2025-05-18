@@ -1,0 +1,43 @@
+❯ python3 run_server.py
+Creating database migrations...
+/bin/sh: python: command not found
+
+Applying migrations...
+/bin/sh: python: command not found
+Traceback (most recent call last):
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedTable: relation "auth_user" does not exist
+LINE 1: SELECT 1 AS "a" FROM "auth_user" WHERE "auth_user"."is_super...
+                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/sarwar.saif/Library/CloudStorage/OneDrive-RakutenGroup,Inc/cicd_codes/CICD-Copilot/CICD-Copilot/backend/run_server.py", line 74, in <module>
+    create_superuser()
+  File "/Users/sarwar.saif/Library/CloudStorage/OneDrive-RakutenGroup,Inc/cicd_codes/CICD-Copilot/CICD-Copilot/backend/run_server.py", line 51, in create_superuser
+    if not User.objects.filter(is_superuser=True).exists():
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/models/query.py", line 1241, in exists
+    return self.query.has_results(using=self.db)
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/models/sql/query.py", line 598, in has_results
+    return compiler.has_results()
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/models/sql/compiler.py", line 1530, in has_results
+    return bool(self.execute_sql(SINGLE))
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/sarwar.saif/Library/Python/3.9/lib/python/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: relation "auth_user" does not exist
+LINE 1: SELECT 1 AS "a" FROM "auth_user" WHERE "auth_user"."is_super...
