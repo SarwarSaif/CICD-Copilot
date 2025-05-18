@@ -23,9 +23,11 @@ The platform consists of two main components:
 
 ## Features
 
-- Upload and manage MOP files
+- Upload and manage MOP files (supports TXT, Word documents, and PDF files)
 - Convert MOP files to executable pipelines with LangChain
+- Generate Jenkins pipeline code from MOP files
 - Interactive pipeline visualization with drag-and-drop editing
+- Code editor with syntax highlighting for viewing and modifying Jenkins pipeline code
 - Execute pipelines and track results
 - Share pipelines with team members
 - User authentication and authorization
@@ -163,15 +165,27 @@ The platform will be available at the URL configured in your ingress.
 
 ## Using the Platform
 
-1. **MOP Files**: Upload your MOP files using the MOP Files page.
+1. **MOP Files**: Upload your MOP files using the MOP Files page. The platform supports:
+   - Text (.txt) files
+   - Word documents (.doc, .docx)
+   - PDF (.pdf) files
+
 2. **Pipelines**: Create pipelines from MOP files using the interactive visual editor:
    - Drag and drop components onto the canvas
    - Connect nodes to create a workflow
    - Configure node properties in the right panel
    - Save your pipeline design
-3. **Execution**: Execute pipelines and monitor their status.
-4. **Sharing**: Share pipelines with team members with view or edit permissions.
-5. **Dashboard**: Monitor overall platform usage and performance metrics.
+
+3. **Jenkins Pipeline Code**: Work with Jenkins pipeline code directly:
+   - View the generated Jenkins pipeline code in the "Jenkins Pipeline" tab
+   - Edit the code with syntax highlighting in the built-in code editor
+   - Save your changes to update the pipeline configuration
+
+4. **Execution**: Execute pipelines and monitor their status.
+
+5. **Sharing**: Share pipelines with team members with view or edit permissions.
+
+6. **Dashboard**: Monitor overall platform usage and performance metrics.
 
 ## API Documentation
 
