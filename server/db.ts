@@ -5,11 +5,14 @@ import * as schema from "@shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
+// Check if DATABASE_URL is available but don't throw an error if it's not
+const dbUrl = process.env.DATABASE_URL || 'postgres://placeholder:placeholder@placeholder:5432/placeholder';
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Create a placeholder pool that won't be used if we're using in-memory storage
+export const pool = new Pool({ 
+  connectionString: dbUrl,
+  // Don't attempt to connect if we don't have a real DATABASE_URL
+  max: process.env.DATABASE_URL ? 10 : 0
+});
+
 export const db = drizzle(pool, { schema });

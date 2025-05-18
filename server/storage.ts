@@ -514,4 +514,5 @@ steps:
 
 // Import and use the DatabaseStorage instead of MemStorage
 import { DatabaseStorage } from "./database-storage";
-export const storage = new DatabaseStorage();
+// Use MemStorage instead of DatabaseStorage since we don't have a database configured
+export const storage = new MemStorage();
