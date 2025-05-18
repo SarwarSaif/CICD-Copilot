@@ -25,7 +25,7 @@ The platform consists of two main components:
 
 - Upload and manage MOP files
 - Convert MOP files to executable pipelines with LangChain
-- Visualize pipeline steps and dependencies
+- Interactive pipeline visualization with drag-and-drop editing
 - Execute pipelines and track results
 - Share pipelines with team members
 - User authentication and authorization
@@ -164,7 +164,11 @@ The platform will be available at the URL configured in your ingress.
 ## Using the Platform
 
 1. **MOP Files**: Upload your MOP files using the MOP Files page.
-2. **Pipelines**: Create pipelines from MOP files and configure their steps.
+2. **Pipelines**: Create pipelines from MOP files using the interactive visual editor:
+   - Drag and drop components onto the canvas
+   - Connect nodes to create a workflow
+   - Configure node properties in the right panel
+   - Save your pipeline design
 3. **Execution**: Execute pipelines and monitor their status.
 4. **Sharing**: Share pipelines with team members with view or edit permissions.
 5. **Dashboard**: Monitor overall platform usage and performance metrics.
@@ -185,15 +189,20 @@ Detailed API documentation is available in the backend README.
 - TanStack Query for data fetching
 - Shadcn UI components
 - Tailwind CSS for styling
+- ReactFlow for interactive pipeline visualization 
+- React Hook Form for form management
+- Zod for validation
 
 ### Backend (Express.js)
 - Node.js with Express
 - TypeScript
+- Drizzle ORM with PostgreSQL
 - In-memory storage with interfaces
 
 ### Backend (Django)
 - Django REST Framework
 - LangChain for MOP processing
+- OpenAI integration for processing MOP files
 - PostgreSQL database
 
 ## Contributing
