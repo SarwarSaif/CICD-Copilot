@@ -59,7 +59,7 @@ ROOT_URLCONF = 'mop_pipeline_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,6 +122,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# React Frontend Settings
+REACT_APP_DIR = os.path.join(os.path.dirname(BASE_DIR), 'client')
+STATICFILES_DIRS = [
+    os.path.join(REACT_APP_DIR, 'dist'),
+]
+
+# Set to True for development, False for production
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+# Allow CORS for development
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
