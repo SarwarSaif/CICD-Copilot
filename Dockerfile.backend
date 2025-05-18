@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY backend/ .
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=mop_pipeline_project.settings
+
+# Run migrations and create superuser if needed
+RUN chmod +x run_server.py
+
+# Expose port
+EXPOSE 8000
+
+# Start server
+CMD ["python", "run_server.py"]

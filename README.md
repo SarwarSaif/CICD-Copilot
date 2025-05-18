@@ -2,234 +2,203 @@
 
 A developer platform for converting Manual Operation Procedure (MOP) files into executable pipelines with visualization.
 
+## Overview
+
+This platform allows developers to:
+
+1. Upload and manage Manual Operation Procedure (MOP) files
+2. Automatically convert MOP files into executable pipelines using LangChain
+3. Visualize, execute, and monitor pipelines
+4. Share pipelines with team members
+5. Collect execution metrics and analytics
+
+## Architecture
+
+The platform consists of two main components:
+
+1. **Frontend**: React-based web interface for interacting with the platform
+2. **Backend**: Available in two implementations:
+   - Express.js with in-memory storage (default)
+   - Django with LangChain and PostgreSQL database (for production)
+
 ## Features
 
-- **MOP File Management**: Upload, view, and manage manual operation procedure files
-- **Pipeline Creation**: Convert MOP files into executable pipelines
-- **Pipeline Execution**: Run pipelines and track execution status
-- **Collaboration**: Share pipelines with team members with customizable permissions
-- **Visualization**: View pipeline steps and execution results
+- Upload and manage MOP files
+- Convert MOP files to executable pipelines with LangChain
+- Visualize pipeline steps and dependencies
+- Execute pipelines and track results
+- Share pipelines with team members
+- User authentication and authorization
+- Performance metrics and analytics dashboard
 
-## Technology Stack
-
-- **Frontend**: React with TypeScript
-- **UI Library**: Tailwind CSS with Shadcn UI components
-- **Backend**: Express.js
-- **Database**: PostgreSQL with Drizzle ORM
-- **State Management**: TanStack Query
-- **Routing**: Wouter
-
-## Local Development Setup
+## Local Development
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- npm (v8 or higher)
-- PostgreSQL (v14 or higher)
+- Node.js v18+ and npm
+- Python 3.11+
+- PostgreSQL database
+- OpenAI API key (for LangChain)
 
-### Installation
+### Setup
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/mop-pipeline-converter.git
+git clone https://github.com/yourusername/mop-pipeline-converter.git
 cd mop-pipeline-converter
 ```
 
-2. Install dependencies:
+2. Install frontend dependencies:
 
 ```bash
 npm install
 ```
 
-3. Set up the environment variables by creating a `.env` file in the root directory:
+3. Set up environment variables:
+
+Create a `.env` file in the project root with the following variables:
 
 ```
-DATABASE_URL=postgresql://username:password@localhost:5432/mop_pipelines
+# For Express.js backend
+PORT=5000
+
+# For Django backend
+DJANGO_SECRET_KEY=your_secret_key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+DJANGO_HOST=0.0.0.0
+DJANGO_PORT=8000
+
+# OpenAI API key for LangChain
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-4. Push the database schema:
+4. Start the application:
 
-```bash
-npm run db:push
-```
-
-5. Start the development server:
-
+For Express.js backend (default):
 ```bash
 npm run dev
 ```
 
-6. The application will be available at [http://localhost:5000](http://localhost:5000)
-
-## Project Structure
-
-```
-├── client/             # Frontend React application
-│   ├── src/
-│       ├── components/ # Reusable UI components
-│       ├── hooks/      # Custom React hooks
-│       ├── lib/        # Utility functions and client setup
-│       ├── pages/      # Application pages
-│       ├── App.tsx     # Main application component
-│       └── main.tsx    # Entry point
-├── server/             # Backend Express server
-│   ├── db.ts           # Database connection and setup
-│   ├── routes.ts       # API route definitions
-│   ├── storage.ts      # Storage interface definition
-│   ├── database-storage.ts # Database implementation of storage
-│   ├── index.ts        # Server entry point
-│   └── vite.ts         # Vite integration for SSR
-├── shared/             # Shared code between client and server
-│   └── schema.ts       # Database schema and type definitions
-└── drizzle.config.ts   # Drizzle ORM configuration
+For Django backend:
+```bash
+cd backend
+python run_server.py
 ```
 
-## Database Schema
+And in a separate terminal, start the frontend:
+```bash
+cd client
+npm run dev
+```
 
-The platform uses the following database tables:
+5. Access the application:
 
-- `users`: User accounts with authentication information
-- `mop_files`: Manual operation procedure files
-- `pipelines`: Pipeline definitions created from MOP files
-- `pipeline_steps`: Individual steps within a pipeline
-- `pipeline_executions`: Execution records for pipelines
-- `shared_pipelines`: Records of pipelines shared between users
-- `team_members`: Team member information
+Frontend: http://localhost:5173
+Express.js API: http://localhost:5000/api
+Django API: http://localhost:8000/api
 
 ## Kubernetes Deployment
 
 ### Prerequisites
 
-- Kubernetes cluster (v1.22+)
-- kubectl CLI configured to your cluster
-- Docker image of the application
+- Kubernetes cluster (GKE, EKS, AKS, or similar)
+- kubectl configured to connect to your cluster
+- Helm v3+
+- Container registry access
 
 ### Deployment Steps
 
-1. Build and push the Docker image:
+1. Build and push Docker images:
 
 ```bash
-docker build -t mop-pipeline-converter:latest .
-docker tag mop-pipeline-converter:latest your-registry/mop-pipeline-converter:latest
-docker push your-registry/mop-pipeline-converter:latest
+# Build and push frontend image
+docker build -t your-registry/mop-pipeline-frontend:latest -f Dockerfile.frontend .
+docker push your-registry/mop-pipeline-frontend:latest
+
+# Build and push backend image
+docker build -t your-registry/mop-pipeline-backend:latest -f Dockerfile.backend .
+docker push your-registry/mop-pipeline-backend:latest
 ```
 
-2. Create Kubernetes deployment files:
-
-**deployment.yaml**:
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mop-pipeline-converter
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: mop-pipeline-converter
-  template:
-    metadata:
-      labels:
-        app: mop-pipeline-converter
-    spec:
-      containers:
-      - name: mop-pipeline-converter
-        image: your-registry/mop-pipeline-converter:latest
-        ports:
-        - containerPort: 5000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: mop-pipeline-secrets
-              key: database_url
-        resources:
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-          requests:
-            cpu: "200m"
-            memory: "256Mi"
-```
-
-**service.yaml**:
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: mop-pipeline-converter
-spec:
-  selector:
-    app: mop-pipeline-converter
-  ports:
-  - port: 80
-    targetPort: 5000
-  type: ClusterIP
-```
-
-**ingress.yaml**:
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: mop-pipeline-converter
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-spec:
-  tls:
-  - hosts:
-    - mop-pipeline.example.com
-    secretName: mop-pipeline-tls
-  rules:
-  - host: mop-pipeline.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: mop-pipeline-converter
-            port:
-              number: 80
-```
-
-**secrets.yaml**:
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mop-pipeline-secrets
-type: Opaque
-data:
-  database_url: <base64-encoded-database-url>
-```
-
-3. Apply the Kubernetes configuration:
+2. Create Kubernetes namespace:
 
 ```bash
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f ingress.yaml
-kubectl apply -f secrets.yaml
+kubectl create namespace mop-pipeline
 ```
 
-4. Verify the deployment:
+3. Deploy PostgreSQL database (using Helm):
 
 ```bash
-kubectl get pods -l app=mop-pipeline-converter
-kubectl get svc mop-pipeline-converter
-kubectl get ingress mop-pipeline-converter
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install postgres bitnami/postgresql \
+  --namespace mop-pipeline \
+  --set auth.username=admin \
+  --set auth.password=adminpassword \
+  --set auth.database=moppipeline
 ```
+
+4. Create Kubernetes secrets:
+
+```bash
+kubectl create secret generic mop-pipeline-secrets \
+  --namespace mop-pipeline \
+  --from-literal=DJANGO_SECRET_KEY=your_secret_key \
+  --from-literal=OPENAI_API_KEY=your_openai_api_key \
+  --from-literal=POSTGRES_PASSWORD=adminpassword
+```
+
+5. Deploy the application:
+
+```bash
+kubectl apply -f kubernetes/deployment.yaml -n mop-pipeline
+kubectl apply -f kubernetes/service.yaml -n mop-pipeline
+kubectl apply -f kubernetes/ingress.yaml -n mop-pipeline
+```
+
+6. Access the application:
+
+The platform will be available at the URL configured in your ingress.
+
+## Using the Platform
+
+1. **MOP Files**: Upload your MOP files using the MOP Files page.
+2. **Pipelines**: Create pipelines from MOP files and configure their steps.
+3. **Execution**: Execute pipelines and monitor their status.
+4. **Sharing**: Share pipelines with team members with view or edit permissions.
+5. **Dashboard**: Monitor overall platform usage and performance metrics.
+
+## API Documentation
+
+The platform provides REST API endpoints for programmatic access:
+
+- Express.js API: http://localhost:5000/api
+- Django API: http://localhost:8000/api
+
+Detailed API documentation is available in the backend README.
+
+## Technology Stack
+
+### Frontend
+- React
+- TanStack Query for data fetching
+- Shadcn UI components
+- Tailwind CSS for styling
+
+### Backend (Express.js)
+- Node.js with Express
+- TypeScript
+- In-memory storage with interfaces
+
+### Backend (Django)
+- Django REST Framework
+- LangChain for MOP processing
+- PostgreSQL database
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
