@@ -1,9 +1,12 @@
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status, permissions, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.utils import timezone
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
 
 from .models import MopFile, Pipeline, PipelineStep, PipelineExecution, SharedPipeline, TeamMember
 from .serializers import (
@@ -11,6 +14,7 @@ from .serializers import (
     PipelineExecutionSerializer, SharedPipelineSerializer, TeamMemberSerializer, UserSerializer
 )
 from .langchain_processor import MopProcessor
+from .file_processor import FileProcessor
 
 
 class MopFileViewSet(viewsets.ModelViewSet):
@@ -20,6 +24,7 @@ class MopFileViewSet(viewsets.ModelViewSet):
     queryset = MopFile.objects.all().order_by('-created_at')
     serializer_class = MopFileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -30,6 +35,49 @@ class MopFileViewSet(viewsets.ModelViewSet):
         recent_files = self.queryset[:5]
         serializer = self.get_serializer(recent_files, many=True)
         return Response(serializer.data)
+        
+    @action(detail=False, methods=['post'], url_path='upload')
+    def upload_file(self, request):
+        """
+        Upload a MOP file (supports TXT, DOCX, DOC, PDF)
+        """
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file was provided'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        uploaded_file = request.FILES['file']
+        file_name = uploaded_file.name
+        
+        # Process the file content
+        try:
+            # Use FileProcessor to extract content and determine file type
+            file_type, content = FileProcessor.process_file_upload(uploaded_file, file_name)
+            
+            if not content:
+                return Response(
+                    {'error': f'Unable to extract content from {file_name}. Unsupported file type or format.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Save the file to storage
+            path = default_storage.save(f'mop_files/{request.user.id}/{file_name}', ContentFile(uploaded_file.read()))
+            
+            # Create the MOP file object
+            mop_file = MopFile.objects.create(
+                name=os.path.splitext(file_name)[0],
+                content=content,
+                file=path,
+                file_type=file_type,
+                user=request.user
+            )
+            
+            serializer = self.get_serializer(mop_file)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error processing file: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     @action(detail=True, methods=['post'])
     def convert_to_pipeline(self, request, pk=None):

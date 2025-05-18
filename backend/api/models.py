@@ -2,20 +2,48 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+def mop_file_upload_path(instance, filename):
+    # Specify the upload path for MOP files
+    return f'mop_files/{instance.user.id}/{filename}'
+
 class MopFile(models.Model):
     """
     Model for Manual Operation Procedure (MOP) files.
     These are the source files that will be converted to pipelines.
+    Supports TXT, Word, and PDF file types.
     """
+    FILE_TYPE_CHOICES = [
+        ('txt', 'Text File'),
+        ('docx', 'Word Document'),
+        ('doc', 'Word Document (Legacy)'),
+        ('pdf', 'PDF Document'),
+        ('other', 'Other'),
+    ]
+    
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     content = models.TextField()
+    file = models.FileField(upload_to=mop_file_upload_path, null=True, blank=True)
+    file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, default='txt')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mop_files')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+        
+    def get_file_type_from_filename(self, filename):
+        """Determine file type from file extension"""
+        if filename.lower().endswith('.txt'):
+            return 'txt'
+        elif filename.lower().endswith('.docx'):
+            return 'docx'
+        elif filename.lower().endswith('.doc'):
+            return 'doc'
+        elif filename.lower().endswith('.pdf'):
+            return 'pdf'
+        else:
+            return 'other'
 
 
 class Pipeline(models.Model):
