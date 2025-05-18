@@ -225,7 +225,7 @@ export default function Pipelines() {
                   className="mt-4"
                   asChild
                 >
-                  <a href="/mop-files">Create Pipeline</a>
+                  <a href="/pipelines/visualizer">Create New Pipeline</a>
                 </Button>
               )}
             </CardContent>
