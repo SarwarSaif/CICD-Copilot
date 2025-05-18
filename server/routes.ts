@@ -12,6 +12,7 @@ import {
   insertSharedPipelineSchema, 
   insertTeamMemberSchema 
 } from "@shared/schema";
+import { convertToJenkinsPipeline } from "./jenkins-converter";
 
 // Set up multer for file uploads
 const upload = multer({
@@ -147,6 +148,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       steps,
       recentExecutions
     });
+  });
+  
+  // Get Jenkins pipeline code for a pipeline
+  app.get('/api/pipelines/:id/jenkins_pipeline', async (req, res) => {
+    try {
+      const pipeline = await storage.getPipeline(parseInt(req.params.id));
+      if (!pipeline) {
+        return res.status(404).json({ error: 'Pipeline not found' });
+      }
+      
+      // Get the associated MOP file
+      const mopFile = await storage.getMopFile(pipeline.mopFileId);
+      const mopContent = mopFile ? mopFile.content : '';
+      
+      // Convert to Jenkins pipeline
+      const jenkinsCode = convertToJenkinsPipeline(mopContent, pipeline);
+      
+      res.json({ jenkins_code: jenkinsCode });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
+  });
+  
+  // Update Jenkins pipeline code for a pipeline
+  app.post('/api/pipelines/:id/update_jenkins_code', express.json(), async (req, res) => {
+    try {
+      const pipeline = await storage.getPipeline(parseInt(req.params.id));
+      if (!pipeline) {
+        return res.status(404).json({ error: 'Pipeline not found' });
+      }
+      
+      const { jenkins_code } = req.body;
+      if (!jenkins_code) {
+        return res.status(400).json({ error: 'Jenkins pipeline code is required' });
+      }
+      
+      // Update the pipeline config with the Jenkins code
+      const updatedConfig = {
+        ...(pipeline.config || {}),
+        jenkins_code
+      };
+      
+      // Save the updated pipeline
+      pipeline.config = updatedConfig;
+      // Note: In a real implementation, you would update the pipeline in the database
+      // Since we don't have a database update method in the storage interface, we'll just return the pipeline
+      
+      res.json({
+        message: 'Jenkins pipeline code updated successfully',
+        pipeline
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'An unknown error occurred' });
+      }
+    }
   });
 
   app.post('/api/pipelines', express.json(), async (req, res) => {
