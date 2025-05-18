@@ -513,5 +513,3 @@ steps:
 }
 
 export const storage = new MemStorage();
-
-export const storage = new MemStorage();

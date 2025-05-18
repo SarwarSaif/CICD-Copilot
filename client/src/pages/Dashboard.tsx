@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { 
   CodeSquare, 
-  FlowChart, 
+  GitBranch, 
   Share2, 
   Users,
   Plus,
@@ -219,7 +219,7 @@ function RecentPipelines({ pipelines, isLoading }: RecentPipelinesProps) {
                       pipeline.status === 'draft' ? 'bg-yellow-100' : 
                       'bg-gray-100'
                     } p-2 rounded-md mr-3`}>
-                      <FlowChart className={`h-5 w-5 ${
+                      <GitBranch className={`h-5 w-5 ${
                         pipeline.status === 'active' ? 'text-green-500' : 
                         pipeline.status === 'draft' ? 'text-yellow-500' : 
                         'text-gray-500'
@@ -259,7 +259,7 @@ function RecentPipelines({ pipelines, isLoading }: RecentPipelinesProps) {
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10">
-            <FlowChart className="h-12 w-12 text-gray-400 mb-4" />
+            <GitBranch className="h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900">No pipelines yet</h3>
             <p className="text-sm text-gray-500 mt-1">Create your first pipeline to get started</p>
           </CardContent>
