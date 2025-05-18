@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
-import Photos from "@/pages/Photos";
-import Collections from "@/pages/Collections";
+import MopFiles from "@/pages/MopFiles";
+import Pipelines from "@/pages/Pipelines";
 import Shared from "@/pages/Shared";
 import Settings from "@/pages/Settings";
 import Sidebar from "@/components/layout/Sidebar";
@@ -21,8 +21,8 @@ function Router() {
         <MobileHeader />
         <Switch>
           <Route path="/" component={Dashboard} />
-          <Route path="/photos" component={Photos} />
-          <Route path="/collections" component={Collections} />
+          <Route path="/mop-files" component={MopFiles} />
+          <Route path="/pipelines" component={Pipelines} />
           <Route path="/shared" component={Shared} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />
