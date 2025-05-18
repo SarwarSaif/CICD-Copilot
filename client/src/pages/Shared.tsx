@@ -71,11 +71,11 @@ export default function Shared() {
   });
 
   // Filter shared pipelines based on search query
-  const filteredPipelines = sharedPipelines ? 
+  const filteredPipelines = Array.isArray(sharedPipelines) ? 
     sharedPipelines.filter((pipeline: SharedPipeline) => 
       pipeline.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      pipeline.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pipeline.sharedBy.toLowerCase().includes(searchQuery.toLowerCase())
+      (pipeline.description && pipeline.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (pipeline.sharedBy && pipeline.sharedBy.toLowerCase().includes(searchQuery.toLowerCase()))
     ) : 
     [];
 

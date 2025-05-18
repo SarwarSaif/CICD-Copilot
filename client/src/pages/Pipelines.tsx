@@ -65,24 +65,18 @@ export default function Pipelines() {
   });
   
   // Filter pipelines based on search query
-  const filteredPipelines = pipelines ? 
+  const filteredPipelines = Array.isArray(pipelines) ? 
     pipelines.filter((pipeline: Pipeline) => 
       pipeline.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      pipeline.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pipeline.mopFileName?.toLowerCase().includes(searchQuery.toLowerCase())
+      (pipeline.description && pipeline.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (pipeline.mopFileName && pipeline.mopFileName.toLowerCase().includes(searchQuery.toLowerCase()))
     ) : 
     [];
   
   const executePipeline = async (pipelineId: number) => {
     try {
       // Create a new pipeline execution
-      await apiRequest('/api/pipeline-executions', {
-        method: 'POST',
-        body: JSON.stringify({ pipelineId }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await apiRequest('/api/pipeline-executions', 'POST', { pipelineId });
       
       toast({
         title: "Pipeline execution started",

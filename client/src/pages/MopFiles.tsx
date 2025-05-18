@@ -69,11 +69,7 @@ function UploadMopFileDialog() {
       formData.append('name', name);
       formData.append('description', description);
       
-      await apiRequest('/api/mop-files/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {},
-      });
+      await apiRequest('/api/mop-files/upload', 'POST', formData);
       
       // Reset form
       setName("");
@@ -188,10 +184,10 @@ export default function MopFiles() {
   });
   
   // Filter files based on search query
-  const filteredFiles = mopFiles ? 
+  const filteredFiles = Array.isArray(mopFiles) ? 
     mopFiles.filter((file: MopFile) => 
       file.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      file.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))
     ) : 
     [];
   
