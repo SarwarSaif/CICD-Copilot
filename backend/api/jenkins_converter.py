@@ -4,7 +4,7 @@ Utility for converting MOP content to Jenkins Pipeline format
 """
 import re
 import json
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any
 
 
 def convert_to_jenkins_pipeline(mop_content: str, pipeline: Optional[Dict[str, Any]] = None) -> str:

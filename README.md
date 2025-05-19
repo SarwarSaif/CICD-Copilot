@@ -52,10 +52,11 @@ git clone https://github.com/yourusername/mop-pipeline-converter.git
 cd mop-pipeline-converter
 ```
 
-2. Install frontend dependencies:
+2. Install dependencies:
 
 ```bash
 npm install
+pip install -r requirements.txt
 ```
 
 3. Set up environment variables:
@@ -63,15 +64,8 @@ npm install
 Create a `.env` file in the project root with the following variables:
 
 ```
-# For Express.js backend
-PORT=5000
-
-# For Django backend
-DJANGO_SECRET_KEY=your_secret_key
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-DJANGO_HOST=0.0.0.0
-DJANGO_PORT=8000
+# Database configuration
+DATABASE_URL=postgresql://username:password@localhost/dbname
 
 # OpenAI API key for LangChain
 OPENAI_API_KEY=your_openai_api_key
@@ -139,7 +133,7 @@ helm install postgres bitnami/postgresql \
 ```bash
 kubectl create secret generic mop-pipeline-secrets \
   --namespace mop-pipeline \
-  --from-literal=DJANGO_SECRET_KEY=your_secret_key \
+  --from-literal=SECRET_KEY=your_secret_key \
   --from-literal=OPENAI_API_KEY=your_openai_api_key \
   --from-literal=POSTGRES_PASSWORD=adminpassword
 ```
@@ -184,10 +178,8 @@ The platform will be available at the URL configured in your ingress.
 
 The platform provides REST API endpoints for programmatic access:
 
-- Express.js API: http://localhost:5000/api
-- Django API: http://localhost:8000/api
-
-Detailed API documentation is available in the backend README.
+FastAPI API: http://localhost:5001/api
+API Documentation: http://localhost:5001/docs
 
 ## Technology Stack
 

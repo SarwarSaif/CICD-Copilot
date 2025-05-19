@@ -7,7 +7,7 @@ import os
 
 from .database import get_db
 from .models import Base
-from .routers import mop_files, pipelines, pipeline_steps, executions, shared, team, settings
+from .routers import mop_files, pipelines, pipeline_steps, executions, shared, team, settings, jenkins
 
 # Create FastAPI app
 app = FastAPI(title="MOP to Pipeline Converter API")
@@ -29,6 +29,7 @@ app.include_router(executions.router, prefix="/api", tags=["Pipeline Executions"
 app.include_router(shared.router, prefix="/api", tags=["Shared Pipelines"])
 app.include_router(team.router, prefix="/api", tags=["Team Members"])
 app.include_router(settings.router, prefix="/api", tags=["Integration Settings"])
+app.include_router(jenkins.router, prefix="/api", tags=["Jenkins Pipeline"])
 
 # Mock auth endpoint for development
 @app.get("/api/auth/me")
