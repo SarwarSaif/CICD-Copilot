@@ -1,5 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Base URL for FastAPI backend
+const API_BASE_URL = "http://localhost:5001";
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -15,7 +18,10 @@ export async function apiRequest(
   // Check if data is FormData
   const isFormData = data instanceof FormData;
   
-  const res = await fetch(url, {
+  // Add API base URL if the URL doesn't already have it and isn't an absolute URL
+  const fullUrl = url.startsWith('http') ? url : url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
+  
+  const res = await fetch(fullUrl, {
     method,
     headers: data && !isFormData ? { "Content-Type": "application/json" } : {},
     body: isFormData ? data : data ? JSON.stringify(data) : undefined,
@@ -32,7 +38,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    // Add the API base URL to the query key path
+    const url = queryKey[0] as string;
+    const fullUrl = url.startsWith('http') ? url : url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
+    
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 
