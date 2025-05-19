@@ -219,12 +219,21 @@ Detailed API documentation is available in the backend README.
 - TypeScript
 - Drizzle ORM with PostgreSQL
 - In-memory storage with interfaces
+- This option was initially implemented for rapid prototyping and development
+
+### Backend (FastAPI)
+- Python FastAPI framework
+- SQLAlchemy ORM with PostgreSQL
+- Pydantic for data validation
+- Asynchronous API endpoints
+- Optimized for performance and scalability
 
 ### Backend (Django)
 - Django REST Framework
 - LangChain for MOP processing
 - OpenAI integration for processing MOP files
 - PostgreSQL database
+- Robust admin interface and ORM
 
 ## Contributing
 
