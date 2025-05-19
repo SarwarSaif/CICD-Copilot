@@ -1,7 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // Base URL for FastAPI backend
-const API_BASE_URL = "http://localhost:5001";
+const API_BASE_URL = "http://localhost:5000";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {

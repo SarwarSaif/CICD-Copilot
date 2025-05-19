@@ -174,6 +174,10 @@ class IntegrationSettingsCreate(IntegrationSettingsBase):
     user_id: int
 
 
+class IntegrationSettingsUpdate(IntegrationSettingsBase):
+    pass
+
+
 class IntegrationSettings(IntegrationSettingsBase):
     id: int
     user_id: int

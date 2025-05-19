@@ -156,7 +156,8 @@ def convert_to_shell_steps(content: str) -> List[str]:
             current_step.append(trimmed_line)
         else:
             # This is likely a description or continuation - echo as comment
-            current_step.append(f"echo '{trimmed_line.replace(\"'\", \"\\\'\")}'")
+            escaped_line = trimmed_line.replace("'", "\\'")
+            current_step.append(f"echo '{escaped_line}'")
     
     # Add the last step if any
     if current_step:

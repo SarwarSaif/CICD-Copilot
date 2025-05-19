@@ -1,35 +1,50 @@
 #!/bin/bash
 
-# Start FastAPI server in the background
-echo "🚀 Starting FastAPI backend on port 5001..."
-python start_fastapi.py &
-FASTAPI_PID=$!
+# Start both FastAPI backend and React frontend
 
-# Wait for FastAPI to initialize
-sleep 2
-
-# Start the frontend in development mode
-echo "🚀 Starting React frontend..."
-npm run dev &
-FRONTEND_PID=$!
-
-# Function to handle SIGINT (Ctrl+C)
-function cleanup {
-  echo "Shutting down services..."
-  kill $FASTAPI_PID
-  kill $FRONTEND_PID
+# Function to shutdown both processes
+shutdown() {
+  echo "Shutting down..."
+  # Kill any background processes we started
+  if [ ! -z "$BACKEND_PID" ]; then
+    kill $BACKEND_PID 2>/dev/null
+  fi
+  if [ ! -z "$FRONTEND_PID" ]; then
+    kill $FRONTEND_PID 2>/dev/null
+  fi
   exit 0
 }
 
-# Register the cleanup function to run on SIGINT
-trap cleanup SIGINT
+# Trap SIGINT (Ctrl+C) and call shutdown
+trap shutdown INT
 
-echo "✅ Application is running!"
-echo "   - FastAPI backend: http://localhost:5001"
-echo "   - API documentation: http://localhost:5001/docs"
-echo "   - React frontend: http://localhost:5173"
-echo ""
-echo "Press Ctrl+C to stop all services"
+# Kill any existing processes that might be using our ports
+echo "Ensuring ports 5000 and 5173 are free..."
+lsof -i:5000 -t | xargs kill -9 2>/dev/null
+lsof -i:5173 -t | xargs kill -9 2>/dev/null
 
-# Keep the script running
-wait $FASTAPI_PID $FRONTEND_PID
+# Start the FastAPI backend
+echo "Starting FastAPI backend on port 5000..."
+cd backend
+python3 -m uvicorn api.app:app --host 0.0.0.0 --port 5000 --reload &
+BACKEND_PID=$!
+cd ..
+
+# Wait for backend to start
+sleep 2
+
+# Start the React frontend (using Vite)
+echo "Starting React frontend on port 5173..."
+cd client
+npm run dev &
+FRONTEND_PID=$!
+cd ..
+
+echo "Application started!"
+echo "Backend API: http://localhost:5000"
+echo "Frontend: http://localhost:5173"
+echo "API Documentation: http://localhost:5000/docs"
+echo "Press Ctrl+C to shutdown both servers"
+
+# Wait for both processes to finish
+wait $BACKEND_PID $FRONTEND_PID
