@@ -4,7 +4,7 @@ from typing import List, Dict, Any
 from datetime import datetime
 import asyncio
 import random
-from ..database import get_db
+from ..database import get_db, SessionLocal
 from ..models import PipelineExecution, Pipeline
 from ..schemas import PipelineExecution as PipelineExecutionSchema, PipelineExecutionCreate
 
@@ -76,11 +76,14 @@ async def create_pipeline_execution(execution: PipelineExecutionCreate, db: Sess
         # Update execution status
         success = random.random() > 0.3  # 70% chance of success
         
-        async with db:
-            execution = db.query(PipelineExecution).filter(PipelineExecution.id == execution_id).first()
+        # Create a new session for this async task
+        db_session = SessionLocal()
+        try:
+            execution = db_session.query(PipelineExecution).filter(PipelineExecution.id == execution_id).first()
             if not execution:
                 return
             
+            # Update execution data
             execution.status = "completed" if success else "failed"
             execution.completed_at = datetime.utcnow()
             execution.logs = "Pipeline executed successfully" if success else "Pipeline execution failed: Error in step 2"
@@ -90,7 +93,12 @@ async def create_pipeline_execution(execution: PipelineExecutionCreate, db: Sess
                 "error": "Step 2 failed with code 1" if not success else None
             }
             
-            db.commit()
+            db_session.commit()
+        except Exception as e:
+            print(f"Error updating execution: {e}")
+            db_session.rollback()
+        finally:
+            db_session.close()
     
     # Start async execution (don't await, let it run in background)
     asyncio.create_task(simulate_execution())
