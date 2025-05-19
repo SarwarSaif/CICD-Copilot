@@ -17,8 +17,9 @@ This platform allows developers to:
 The platform consists of two main components:
 
 1. **Frontend**: React-based web interface for interacting with the platform
-2. **Backend**: Available in two implementations:
-   - Express.js with in-memory storage (default)
+2. **Backend**: Available in three implementations:
+   - Express.js with in-memory storage 
+   - FastAPI with SQLAlchemy and PostgreSQL database
    - Django with LangChain and PostgreSQL database (for production)
 
 ## Features
@@ -83,6 +84,11 @@ For Express.js backend (default):
 npm run dev
 ```
 
+For FastAPI backend:
+```bash
+python start_fastapi.py
+```
+
 For Django backend:
 ```bash
 cd backend
@@ -99,6 +105,7 @@ npm run dev
 
 Frontend: http://localhost:5173
 Express.js API: http://localhost:5000/api
+FastAPI API: http://localhost:5001/api
 Django API: http://localhost:8000/api
 
 ## Kubernetes Deployment
