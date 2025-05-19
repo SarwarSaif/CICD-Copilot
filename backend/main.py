@@ -188,7 +188,7 @@ def run_server():
     uvicorn.run(
         "api.app:app",
         host="0.0.0.0",
-        port=5001,  # Use port 5001 to avoid conflict with existing server
+        port=5000,  # Use port 5000 to match workflow configuration
         reload=True
     )
 

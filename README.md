@@ -17,10 +17,10 @@ This platform allows developers to:
 The platform consists of two main components:
 
 1. **Frontend**: React-based web interface for interacting with the platform
-2. **Backend**: Available in three implementations:
-   - Express.js with in-memory storage 
-   - FastAPI with SQLAlchemy and PostgreSQL database
-   - Django with LangChain and PostgreSQL database (for production)
+2. **Backend**: FastAPI with SQLAlchemy and PostgreSQL database
+   - Modern Python-based API
+   - SQLAlchemy ORM for database interactions
+   - Pydantic for request/response validation
 
 ## Features
 
@@ -79,34 +79,20 @@ OPENAI_API_KEY=your_openai_api_key
 
 4. Start the application:
 
-For Express.js backend (default):
-```bash
-npm run dev
-```
-
-For FastAPI backend:
+Start the FastAPI backend:
 ```bash
 python start_fastapi.py
 ```
 
-For Django backend:
-```bash
-cd backend
-python run_server.py
-```
-
 And in a separate terminal, start the frontend:
 ```bash
-cd client
 npm run dev
 ```
 
 5. Access the application:
 
 Frontend: http://localhost:5173
-Express.js API: http://localhost:5000/api
 FastAPI API: http://localhost:5001/api
-Django API: http://localhost:8000/api
 
 ## Kubernetes Deployment
 
@@ -214,26 +200,15 @@ Detailed API documentation is available in the backend README.
 - React Hook Form for form management
 - Zod for validation
 
-### Backend (Express.js)
-- Node.js with Express
-- TypeScript
-- Drizzle ORM with PostgreSQL
-- In-memory storage with interfaces
-- This option was initially implemented for rapid prototyping and development
-
-### Backend (FastAPI)
+### Backend
 - Python FastAPI framework
 - SQLAlchemy ORM with PostgreSQL
 - Pydantic for data validation
-- Asynchronous API endpoints
-- Optimized for performance and scalability
-
-### Backend (Django)
-- Django REST Framework
+- Asynchronous API endpoints 
 - LangChain for MOP processing
 - OpenAI integration for processing MOP files
-- PostgreSQL database
-- Robust admin interface and ORM
+- JWT for authentication
+- TextExtract for document parsing
 
 ## Contributing
 
