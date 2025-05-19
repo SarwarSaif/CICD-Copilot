@@ -79,20 +79,20 @@ OPENAI_API_KEY=your_openai_api_key
 
 4. Start the application:
 
-Start the FastAPI backend:
+Use the included shell script to start both the FastAPI backend and React frontend:
 ```bash
-python start_fastapi.py
+./run_app.sh
 ```
 
-And in a separate terminal, start the frontend:
-```bash
-npm run dev
-```
+This will start:
+- FastAPI backend on port 5001
+- React frontend on port 5173
 
 5. Access the application:
 
 Frontend: http://localhost:5173
 FastAPI API: http://localhost:5001/api
+API Documentation: http://localhost:5001/docs
 
 ## Kubernetes Deployment
 

@@ -1,163 +1,196 @@
-from typing import Optional, List, Dict, Any, Union
-from pydantic import BaseModel, Field
+"""
+Pydantic Schemas for FastAPI
+"""
+from typing import List, Dict, Optional, Any, Union
 from datetime import datetime
+from pydantic import BaseModel, Field
+
 
 # User schemas
 class UserBase(BaseModel):
     username: str
-    email: Optional[str] = None
+    email: str
     first_name: Optional[str] = None
     last_name: Optional[str] = None
+
 
 class UserCreate(UserBase):
     password: str
 
+
 class User(UserBase):
     id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # MOP File schemas
 class MopFileBase(BaseModel):
     name: str
     description: Optional[str] = None
+    file_type: str
     content: str
-    user_id: int
+
 
 class MopFileCreate(MopFileBase):
-    pass
+    user_id: int
+
 
 class MopFile(MopFileBase):
     id: int
+    user_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Pipeline schemas
 class PipelineBase(BaseModel):
     name: str
     description: Optional[str] = None
     status: str = "draft"
-    user_id: int
-    mop_file_id: int
     config: Optional[Dict[str, Any]] = None
 
+
 class PipelineCreate(PipelineBase):
-    pass
+    user_id: int
+    mop_file_id: int
+
 
 class Pipeline(PipelineBase):
     id: int
+    user_id: int
+    mop_file_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Pipeline Step schemas
 class PipelineStepBase(BaseModel):
     name: str
     type: str
     position: int
-    pipeline_id: int
     config: Optional[Dict[str, Any]] = None
 
+
 class PipelineStepCreate(PipelineStepBase):
-    pass
+    pipeline_id: int
+
 
 class PipelineStep(PipelineStepBase):
     id: int
+    pipeline_id: int
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Pipeline Execution schemas
 class PipelineExecutionBase(BaseModel):
     status: str = "pending"
-    pipeline_id: int
     logs: Optional[str] = None
     results: Optional[Dict[str, Any]] = None
 
+
 class PipelineExecutionCreate(PipelineExecutionBase):
-    pass
+    pipeline_id: int
+
 
 class PipelineExecution(PipelineExecutionBase):
     id: int
+    pipeline_id: int
     started_at: datetime
     completed_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Shared Pipeline schemas
 class SharedPipelineBase(BaseModel):
-    pipeline_id: int
-    shared_by_user_id: int
-    shared_with_user_id: int
-    permissions: str = "view"
+    shared_with: str
+    permissions: str = "read"
+
 
 class SharedPipelineCreate(SharedPipelineBase):
-    pass
+    pipeline_id: int
+    shared_by: int
+
 
 class SharedPipeline(SharedPipelineBase):
     id: int
+    pipeline_id: int
+    shared_by: int
     shared_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Team Member schemas
 class TeamMemberBase(BaseModel):
     name: str
     email: str
-    role: str = "member"
-    user_id: int
+    role: str
+
 
 class TeamMemberCreate(TeamMemberBase):
-    pass
+    user_id: int
+
 
 class TeamMember(TeamMemberBase):
     id: int
+    user_id: int
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 # Integration Settings schemas
 class IntegrationSettingsBase(BaseModel):
-    user_id: int
     jenkins_url: Optional[str] = None
     jenkins_username: Optional[str] = None
     jenkins_token: Optional[str] = None
-    jenkins_job_template: Optional[str] = None
     github_url: Optional[str] = None
     github_username: Optional[str] = None
     github_token: Optional[str] = None
-    github_repository: Optional[str] = None
-    github_branch: str = "main"
+    artifactory_url: Optional[str] = None
+    artifactory_username: Optional[str] = None
+    artifactory_token: Optional[str] = None
+
 
 class IntegrationSettingsCreate(IntegrationSettingsBase):
-    pass
+    user_id: int
 
-class IntegrationSettingsUpdate(BaseModel):
-    jenkins_url: Optional[str] = None
-    jenkins_username: Optional[str] = None
-    jenkins_token: Optional[str] = None
-    jenkins_job_template: Optional[str] = None
-    github_url: Optional[str] = None
-    github_username: Optional[str] = None
-    github_token: Optional[str] = None
-    github_repository: Optional[str] = None
-    github_branch: Optional[str] = None
 
 class IntegrationSettings(IntegrationSettingsBase):
     id: int
+    user_id: int
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+# Stats Response schema
+class StatsResponse(BaseModel):
+    total_mop_files: int
+    pipelines: int
+    shared: int
+
+
+# Jenkins Pipeline Response schema
+class JenkinsPipelineResponse(BaseModel):
+    jenkins_code: str
