@@ -50,6 +50,7 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
+  
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
@@ -58,10 +59,7 @@ app.use((req, res, next) => {
 
   // Use port 5000 as expected by the workflow
   const port = 5000;
-  server.listen({
-    port,
-    host: "127.0.0.1",
-  }, () => {
+  server.listen(port, "127.0.0.1", () => {
     log(`serving on port ${port}`);
   });
 })();
